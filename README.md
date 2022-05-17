@@ -1,6 +1,13 @@
 Ejemplo de Uso de Pulsar con Kotlin
 --
 
+## Info
+
+Este ejemplo esta basado en el [video](https://www.youtube.com/watch?v=PRoFPsplfnM)
+
+Cuyo Repositorio es [repo](https://github.com/geomagilles/demo-pulsar-kotlin)
+
+y el articulo relacionado sobre como [Integrar Schemas con Avro](https://gillesbarbier.medium.com/using-apache-pulsar-with-kotlin-3b0ab398cf52)
 
 ## Running
 

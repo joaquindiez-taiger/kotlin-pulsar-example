@@ -1,5 +1,8 @@
+import org.apache.pulsar.client.api.DeadLetterPolicy
 import org.apache.pulsar.client.api.PulsarClient
 import org.apache.pulsar.client.api.SubscriptionInitialPosition
+import org.apache.pulsar.client.api.SubscriptionType
+import java.util.concurrent.TimeUnit
 
 
 /**
@@ -28,9 +31,11 @@ object Pulsar {
      */
     internal fun consumer(client: PulsarClient, name: String) = client
         .newConsumer()
-        .topic(topic)
-      //  .subscriptionType(SubscriptionType.Shared)
         .subscriptionName(name)
+        .subscriptionType(SubscriptionType.Shared)
+        .negativeAckRedeliveryDelay(5, TimeUnit.SECONDS)
+        .deadLetterPolicy(DeadLetterPolicy.builder().maxRedeliverCount(2).build())
+        .topic(topic)
         .subscribe()
 
     internal fun consumerFromEarliest(client: PulsarClient, name: String) = client

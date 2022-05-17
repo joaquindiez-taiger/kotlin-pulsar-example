@@ -14,21 +14,27 @@ fun main() {
 
         while (true) {
             val message: Message<ByteArray> = consumer.receive()
-             val refundRequestEvent = RefundRequest.fromByteArray(message.data)
 
-            when ( refundChecker.check(refundRequestEvent.refund)){
+            try{
+                val refundRequestEvent = RefundRequest.fromByteArray(message.data)
+                when ( refundChecker.check(refundRequestEvent.refund)){
 
-                is RefundStatus.Declined -> {
-                    println ( "Refund ${refundRequestEvent.refund.id} declined")
+                    is RefundStatus.Declined -> {
+                        println ( "Refund ${refundRequestEvent.refund.id} declined")
+                    }
+                    is RefundStatus.Approved -> {
+                        println ( "Refund ${refundRequestEvent.refund.id} approved")
+                    }
+
                 }
-
-                is RefundStatus.Approved -> {
-                    println ( "Refund ${refundRequestEvent.refund.id} approved")
-                }
-
+                consumer.acknowledge(message)
+            }catch(e: java.lang.Exception){
+                consumer.negativeAcknowledge(message)
+                println ( "Refund ${message.messageId} rejected")
             }
 
-            consumer.acknowledge(message)
+
+
         }
 
     }

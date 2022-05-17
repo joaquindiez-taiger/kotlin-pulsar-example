@@ -1,42 +1,45 @@
-import events.RefundRequest
-import org.apache.pulsar.client.api.Message
+import events.RefundEvent
+import kotlinx.coroutines.future.await
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.runBlocking
+import org.apache.pulsar.client.api.PulsarClientException
+import org.slf4j.LoggerFactory
 
-fun main() {
-    println(" Start RefundChecker v1.0")
+fun main() = runBlocking {
+    val logger = LoggerFactory.getLogger("RefundCheckerService")
+    logger.info(" Start RefundChecker v1.0")
 
     val refundChecker = RefundChecker()
 
     Pulsar.client().use { pulsarClient ->
 
-        val consumer = Pulsar.consumer(pulsarClient, "refund-checker-subscription")
+        val consumer = Pulsar.refundEventsConsumer(pulsarClient, "refund-checker-subscription")
 
-        println(" Consumer Obtained")
+        while (isActive) {
 
-        while (true) {
-            val message: Message<ByteArray> = consumer.receive()
-
+            val message = try {
+                consumer.receiveAsync().await()
+            } catch (e: PulsarClientException) {
+                logger.warn("Failed to receive message: $e")
+                continue
+            }
+            //val message: Message<ByteArray> = consumer.receive()
             try{
-                val refundRequestEvent = RefundRequest.fromByteArray(message.data)
+                val refundRequestEvent = RefundEvent.fromByteArray(message.data)
                 when ( refundChecker.check(refundRequestEvent.refund)){
 
                     is RefundStatus.Declined -> {
-                        println ( "Refund ${refundRequestEvent.refund.id} declined")
+                        logger.info ( "Refund ${refundRequestEvent.refund.id} declined")
                     }
                     is RefundStatus.Approved -> {
-                        println ( "Refund ${refundRequestEvent.refund.id} approved")
+                        logger.info ( "Refund ${refundRequestEvent.refund.id} approved")
                     }
-
                 }
                 consumer.acknowledge(message)
             }catch(e: java.lang.Exception){
                 consumer.negativeAcknowledge(message)
-                println ( "Refund ${message.messageId} rejected")
+                logger.info ( "Refund ${message.messageId} rejected")
             }
-
-
-
         }
-
     }
-
 }

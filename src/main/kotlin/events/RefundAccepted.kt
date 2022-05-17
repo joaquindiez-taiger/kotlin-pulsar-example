@@ -1,7 +1,9 @@
 package events
 
+import kotlinx.serialization.SerialName
 import models.Refund
 
+@kotlinx.serialization.Serializable @SerialName("RefundAccepted")
 data class RefundAccepted (
-    val refund: Refund
-    )
+    override val refund: Refund
+): RefundEvent()

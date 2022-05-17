@@ -14,7 +14,11 @@ repositories {
 }
 
 dependencies {
+    implementation("org.slf4j:slf4j-simple:1.7.36")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.6.1")
+
     implementation("org.apache.pulsar:pulsar-client:2.10.0")
     testImplementation(kotlin("test"))
 }

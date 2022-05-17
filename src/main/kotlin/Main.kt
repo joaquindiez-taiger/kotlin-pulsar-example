@@ -1,21 +1,21 @@
 import events.RefundRequest
+import kotlinx.coroutines.runBlocking
 import models.Refund
+import org.slf4j.LoggerFactory
 
-fun main () {
+fun main () = runBlocking {
+    val logger = LoggerFactory.getLogger("EventsProducer")
 
-    println("Running Kotlin Pulsar Sample")
+    logger.info("Running Kotlin Pulsar Sample")
 
      Pulsar.client().use {pulsarClient ->
-        val producer = Pulsar.producer(pulsarClient)
+        val producer = Pulsar.refundEventsProducer(pulsarClient)
 
         repeat(10) {
-
             val event = RefundRequest(Refund.random())
-            println(event)
-            producer.send(event.toByteArray())
+
+            logger.info("Sending ${event.refund.id}")
+            producer.sendEvent(event)
         }
-
     }
-
-
 }
